@@ -1,0 +1,4 @@
+filename,file_size,file_attributes,region_count,region_id,region_shape_attributes,region_attributes
+20201027_101455_SHELL_M55_6320427744_CLOSEUP-EL_300.0s_3.393106A_24.047298V_cell_0.jpg,78464,"{}",3,0,"{""name"":""polygon"",""all_points_x"":[115,240,253,100],""all_points_y"":[119,111,200,190]}","{""Defect_Class"":""Crack_Closed""}"
+20201027_101455_SHELL_M55_6320427744_CLOSEUP-EL_300.0s_3.393106A_24.047298V_cell_0.jpg,78464,"{}",3,1,"{""name"":""polygon"",""all_points_x"":[387,602,584,387],""all_points_y"":[101,115,197,188]}","{""Defect_Class"":""Contact_Corrosion""}"
+20201027_101455_SHELL_M55_6320427744_CLOSEUP-EL_300.0s_3.393106A_24.047298V_cell_0.jpg,78464,"{}",3,2,"{""name"":""polygon"",""all_points_x"":[105,266,421,516,622,642,562,414,266,170,85],""all_points_y"":[325,416,479,412,345,483,584,599,597,531,497]}","{""Defect_Class"":""Contact_NearSolderPad""}"
