@@ -1,0 +1,50 @@
+Total records: 800
+Unique images: 100
+Columns: filename, file_size, file_attributes, region_count, region_id, region_shape_attributes
+
+First 5 rows:
+
+==================================================
+Row 1:
+filename: 20170412_152026_JABIL_QCELLS_521011165014200055_0Pa_s_A_V_cell_53.png
+file_size: 120979
+file_attributes: {}
+region_count: 8
+region_id: 0
+region_shape_attributes: {"name":"polygon","all_points_x":[42,42,50,50],"all_points_y":[5,15,15,5]}
+
+==================================================
+Row 2:
+filename: 20170412_152026_JABIL_QCELLS_521011165014200055_0Pa_s_A_V_cell_53.png
+file_size: 120979
+file_attributes: {}
+region_count: 8
+region_id: 1
+region_shape_attributes: {"name":"polygon","all_points_x":[230,231,242,242],"all_points_y":[10,20,20,10]}
+
+==================================================
+Row 3:
+filename: 20170412_152026_JABIL_QCELLS_521011165014200055_0Pa_s_A_V_cell_53.png
+file_size: 120979
+file_attributes: {}
+region_count: 8
+region_id: 2
+region_shape_attributes: {"name":"polygon","all_points_x":[295,226,177,61,50,120,182,295],"all_points_y":[30,40,50,60,70,80,90,30]}
+
+==================================================
+Row 4:
+filename: 20170412_152026_JABIL_QCELLS_521011165014200055_0Pa_s_A_V_cell_53.png
+file_size: 120979
+file_attributes: {}
+region_count: 8
+region_id: 3
+region_shape_attributes: {"name":"polygon","all_points_x":[189,174,161,60,53,120,156,189],"all_points_y":[35,45,55,65,75,85,95,35]}
+
+==================================================
+Row 5:
+filename: 20170412_152026_JABIL_QCELLS_521011165014200055_0Pa_s_A_V_cell_53.png
+file_size: 120979
+file_attributes: {}
+region_count: 8
+region_id: 4
+region_shape_attributes: {"name":"polygon","all_points_x":[65,65,56,56],"all_points_y":[25,35,35,25]}
