@@ -23,6 +23,7 @@ merged_df = pd.merge(iv_el_df, defects_df, on='id', how='inner')
 
 merged_df_export_file_path = ""
 
+# What I noticed is an issue with the merged dataframe is it is approximately 4x the amount of rows in the m55 dataframe, it makes me think that i am duplicating it for each individual defect
 # Optional if want to download the merged csv
 # merged_df.to_csv(merged_df_export_file_path, index=False)
 
