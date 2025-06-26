@@ -1,0 +1,57 @@
+The scripts contained within this folder have a lot of overlapping code. 
+This was an unfortunate consequence of previous needs but we can fix that now by recreating all of the main functions
+in a way that is not dependent on previous information. 
+I also recommend adapting the 2 new image processing scripts before tackling this.
+
+
+ELDefectSegmentation.py is the original UCF-EL-Defect script and is completely unchanged.
+You can use this as a reference of what should happen.
+
+segmentationPixelCount.py does all of the same things as the original script and it adds 
+the exact amount of pixels that contribute to each defect into the output csv.
+
+MaskSeparator2.py does all of the same things as the original script and it creates 2 new folders, 
+Masked, and Unmasked. Masked contains all of the images with the prediction mask over it.
+Unmasked contains all of the original cell images in black and white. 
+
+defectDataframeV1.py generates a csv from the outputted json files that ELDefectSegmentation.py generates.
+
+
+
+
+ELDefectSegmentation.py currently has a structure of roughly this:
+
+    - Paramters:
+    - initiliaze weights from pretrained model and softmax
+    - Sets up colormap *
+    - preps every image in input folder
+        - attempts to crop images *
+    - sets up a threshold for detecting defects *
+    - calculate defect percentages *
+    - plots the images, masks, and defect percentages into the same plots *
+
+Sections marked with * should be turned into their own function.
+
+This script is of course specialized towards a specific project but for us many of these stages
+need to be turned into usuable functions future future researchers. For example, the colormap can
+become its own function because now we are starting to do multiple projects built upon the same
+defect categories that were defined by the original paper.
+
+The crop images section should also be made its own function and should be modularized to accept any kind of module.
+In my testing, it fails significantly when given a variety of different kinds of modules with different cell x cell counts.
+Obviously, it has the ability to change the cell x cell count but that still doesn't help because it's too specific.
+You'll notice that you already did this for the cellCropping.py script but you should look at this section, and the other
+scripts that its calls from that package, and you should see if there are any missing features or methods that are not
+included and then add that a capability in case the caller of the function needs it.
+
+As we are now including a lot more functions and similarly named capabilities, you will want to choose smart names
+that accurately describe what the function does and how it is different from any other similarly named functions.
+
+
+
+For segmentationPixelCount add the pixel count into its own function.
+For maskSeparator2.py add the mask separation into its own function.
+Make a new function for generating the exact coordinates of each pixel that's classified as a defect and exported into a database.
+
+
+
