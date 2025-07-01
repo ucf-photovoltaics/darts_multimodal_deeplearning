@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 df = pd.read_csv('clustered_iv_defects.csv')
 
 # Calculate correlations
-correlation_matrix = df[['Crack', 'Contact', 'Interconnect', 'Corrosion', 'Vmp_(V)', 'Voc_(V)', 'Pmp_(W)', 'Efficiency_(%)']].corr()
+#correlation_matrix = df[['Crack', 'Contact', 'Interconnect', 'Corrosion', 'Vmp_(V)', 'Voc_(V)', 'Pmp_(W)', 'Efficiency_(%)']].corr() #Possibly use for readability
+correlation_matrix = df[['Crack', 'Contact', 'Interconnect', 'Corrosion', 
+                         'Vmp_(V)', 'Voc_(V)', 'Imp_(A)', 'Isc_(A)', 'Pmp_(W)', 'Efficiency_(%)', 'FF']].corr() #Full output
 
 #Plotting the heatmap
 plt.figure(figsize=(10, 6))
