@@ -47,11 +47,11 @@ merged_df = pd.merge(defects_with_meta, iv_el_df, on="id", how="inner")
 features_cols = ['Crack', 'Contact', 'Interconnect', 'Corrosion',
                  'Isc_(A)', 'Voc_(V)', 'Pmp_(W)']
 
-if features.empty:
-    raise ValueError("No valid rows left after dropping NaN and 0 values.")
-
 # Drop rows with any missing values in selected features
 features = merged_df[features_cols].dropna()
+
+if features.empty:
+    raise ValueError("No valid rows left after dropping NaN and 0 values.")
 
 # Scale the features
 scaler = StandardScaler()
