@@ -2,6 +2,8 @@ import cv2
 import os
 import numpy as np
 
+__all__ = ["adjust_gamma", "process_images"]
+
 # Adjusts the gamma of the image. Takes in the image, and the gamma value (int).
 def adjust_gamma(image, gamma=3.0):
     """
@@ -21,6 +23,9 @@ def process_images(input_folder, output_folder):
     # Supported image extensions
     image_extensions = ['.jpg', '.jpeg', '.png', '.bmp']
 
+    # Creates output directory
+    os.makedirs(output_folder, exist_ok=True)
+
     # Process each image
     for filename in os.listdir(input_folder):
         # Check if file is an image
@@ -35,19 +40,8 @@ def process_images(input_folder, output_folder):
 
                 # Save result
                 cv2.imwrite(output_path, adjusted_image)
-                print(f"Processed: {filename}")
+                print(f"Processed: {filename} and corrected the gamma")
             except Exception as e:
                 print(f"Error processing {filename}: {str(e)}")
-
-def main():
-    input_folder = ""
-    output_folder = ""
-
-    # Create output folder if it doesn't exist
-    os.makedirs(output_folder, exist_ok=True)
-
-    # Process images
-    process_images(input_folder, output_folder)
-
-if __name__ == "__main__":
-    main()
+        
+    print(f"Gamma corrected {len(os.listdir(input_folder))} images in '{input_folder}' and saved to '{output_folder}'")

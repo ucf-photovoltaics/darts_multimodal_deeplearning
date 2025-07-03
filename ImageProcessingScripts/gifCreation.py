@@ -2,11 +2,13 @@ from PIL import Image
 import os
 import re
 
+__all__ = ["extract_info", "create_gif_from_stitched_images"]
+
 # Extract the timestamp and module id because that is what's being used to identify the whole module. Takes in a filename. Returns a dictionary.
 # This function will need to be turned into a more modular system eventually.
 def extract_info(filename):
     """Extract timestamp and module id from filename."""
-    match = re.search(r'(\d{8})_(\d{6})_(\w+)_stitched\.png', filename)
+    match = re.search(r'(\d{8})_(\d{6})_(.+?)_stitched\.png', filename)
     if match:
         return {
             'timestamp': f"{match.group(1)}_{match.group(2)}",
@@ -16,6 +18,9 @@ def extract_info(filename):
 
 # Creates the gifs from a folder of input images. Outputs the gif to the output folder. The input duration controls how many miliseconds are in between each image.
 def create_gif_from_stitched_images(input_folder, output_folder, duration=500):
+    # Create output directory if it doesn't exist
+    os.makedirs(output_folder, exist_ok=True)
+    
     # Get list of all stitched images
     image_files = [f for f in os.listdir(input_folder) 
                   if f.endswith('_stitched.png')]
@@ -36,7 +41,7 @@ def create_gif_from_stitched_images(input_folder, output_folder, duration=500):
     
     # Create GIF for each module
     for module_id, image_list in modules.items():
-        print(f"\nProcessing module: {module_id}")
+        print(f"Processed: {image_file} and created a GIF")
         
         # Sort images by timestamp
         image_list.sort(key=lambda x: x[1])
@@ -68,12 +73,9 @@ def create_gif_from_stitched_images(input_folder, output_folder, duration=500):
                 duration=duration,
                 loop=0  # Infinite loop
             )
-            print(f"GIF created successfully: {output_path}")
+            # print(f"GIF created successfully: {output_path}")
         else:
             print(f"No valid images loaded for module {module_id}")
-
-if __name__ == "__main__":
-    # Absolute filepaths for the input (individual cells) and the output (the final gif).
-    input_folder = ""
-    output_folder = ""
-    create_gif_from_stitched_images(input_folder, output_folder)
+            
+    print(f"Created a GIF for {len(modules)} images in '{input_folder}' and saved to '{output_folder}'")    
+            

@@ -1,8 +1,8 @@
 import os
 from PIL import Image
 import re
-import sys
 
+__all__ = ["get_cell_number", "extract_module_name", "create_module", "stitch_all_modules"]
 # Right now this script only works for 6x10 modules. This function should be adapted to work for any sized module so long as the correct cell x cell dimensions are given.
 
 # Extracts the cell number from the filename.
@@ -19,15 +19,16 @@ def extract_module_name(filename):
     return base_name
 
 # Stitches the cells together in a single modules. Takes in the folder path to the cells, the extracted filename, a list of the images involved, and the output directory.
-def create_module(images_dir, module_filename, images_list, output_dir):
-    print(f"\n=== Processing module: {module_filename} ===")
-    print(f"DEBUG: Current working directory: {os.getcwd()}")
-    print(f"DEBUG: Images directory: {images_dir}")
-    print(f"DEBUG: Output directory: {output_dir}")
+def create_module(images_dir, module_filename, images_list, output_dir, rows, columns):
+    # print(f"\n=== Processing module: {module_filename} ===")
+    # print(f"DEBUG: Current working directory: {os.getcwd()}")
+    # print(f"DEBUG: Images directory: {images_dir}")
+    # print(f"DEBUG: Output directory: {output_dir}")
     
-    # Verify we have exactly 60 images
-    if len(images_list) != 60:
-        print(f"WARNING: Expected 60 cells but found {len(images_list)}")
+    # Verify we have the expected amount of images
+    expected_count = rows * columns
+    if len(images_list) != expected_count:
+        print(f"WARNING: Expected {expected_count} cells but found {len(images_list)}")
         print("Files:", images_list)
         return None
         
@@ -45,7 +46,7 @@ def create_module(images_dir, module_filename, images_list, output_dir):
     
     # Verify cell numbers are sequential
     cell_numbers = [get_cell_number(f) for f in images_list]
-    expected_numbers = list(range(1, 61))
+    expected_numbers = list(range(expected_count))
     
     if sorted(cell_numbers) != expected_numbers:
         print("\nERROR: Cell numbers are not sequential!")
@@ -53,18 +54,18 @@ def create_module(images_dir, module_filename, images_list, output_dir):
         print(f"Found numbers: {sorted(cell_numbers)}")
         return None
         
-    print("\nValidation successful! Creating module...")
+    # print("\nValidation successful! Creating module...")
     
-    print("\nLoading images...")
+    # print("\nLoading images...")
     # Load all images
     images = []
     for filename in images_list:
         img_path = os.path.join(images_dir, filename)
-        print(f"DEBUG: Attempting to load: {img_path}")
+        # print(f"DEBUG: Attempting to load: {img_path}")
         try:
             img = Image.open(img_path)
             images.append(img)
-            print(f"DEBUG: Successfully loaded {filename} - Size: {img.size}")
+        #    print(f"DEBUG: Successfully loaded {filename} - Size: {img.size}")
         except Exception as e:
             print(f"ERROR: Could not load {filename}: {str(e)}")
             return None
@@ -72,16 +73,16 @@ def create_module(images_dir, module_filename, images_list, output_dir):
     # Get dimensions
     width = images[0].width
     height = images[0].height
-    print(f"\nCreating canvas: {width*10}x{height*6}")
+    # print(f"\nCreating canvas: {width * columns}x{height * rows}")
     
     # Create large canvas
-    canvas = Image.new('RGB', (width * 10, height * 6))
+    canvas = Image.new('RGB', (width * columns, height * rows))
     
     # Place images in grid according to specified pattern
-    for i in range(60):
+    for i in range(expected_count):
         # Calculate position in the grid
-        row = i // 10  # Rows 0-5
-        col = i % 10   # Columns 0-9
+        row = i // columns
+        col = i % columns   
         
         # Place image on canvas
         x_pos = col * width
@@ -89,27 +90,26 @@ def create_module(images_dir, module_filename, images_list, output_dir):
         canvas.paste(images[i], (x_pos, y_pos))
         
         # Print progress every row
-        if i % 10 == 9:  # After completing each row
-            print(f"DEBUG: Placed row {row + 1}/6")
+        #if i % 10 == 9:  # After completing each row
+        #    print(f"DEBUG: Placed row {row + 1}/6")
     
     # Save combined image
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, module_filename)
-    print(f"DEBUG: Saving to: {output_path}")
+    # print(f"DEBUG: Saving to: {output_path}")
     canvas.save(output_path)
-    print(f"\nSuccessfully saved combined image to: {output_path}")
+    print(f"Processed: {module_filename} and stitched them together")
     return output_path
 
 # Runs the other scripts for all of the folders in a directory. This should probably be turned into its own function that is not dependent on the rest of these scripts but is modularized to accept other forms of image processing.
-def stitch_all_modules(images_dir, output_dir):
+def stitch_all_modules(images_dir, output_dir, rows=6, columns=10):
     # Get all files matching pattern
-    files = [f for f in os.listdir(images_dir) 
-             if re.search(r'^.*?cell_\d+\.png$', f)]
-    print(f"DEBUG: Found {len(files)} potential files:")
-    for f in files[:5]:  # Show first 5 files for verification
-        print(f"- {f}")
-    if len(files) > 5:
-        print("- ...")  # Indicate there might be more
+    files = [f for f in os.listdir(images_dir) if re.search(r'^.*?cell_\d+\.png$', f)]
+    # print(f"DEBUG: Found {len(files)} potential files:")
+    # for f in files[:5]:  # Show first 5 files for verification
+    #     print(f"- {f}")
+    # if len(files) > 5:
+    #     print("- ...")  # Indicate there might be more
     
     # Group files by module name
     modules = {}
@@ -132,20 +132,16 @@ def stitch_all_modules(images_dir, output_dir):
         # Create module filename (e.g., "module_001.png")
         module_filename = f"{module_name}_stitched.png"
         
-        print(f"\n{'='*50}")
-        print(f"Processing module {module_num}/{len(modules)}: {module_name}")
-        print(f"Files: {files_list[:5]}...")
-        if len(files_list) > 5:
-            print("...")
+        # print(f"\n{'='*50}")
+        # print(f"Processing module {module_num}/{len(modules)}: {module_name}")
+        # print(f"Files: {files_list[:5]}...")
+        # if len(files_list) > 5:
+        #     print("...")
         
         try:
-            output_path = create_module(images_dir, module_filename, files_list, output_dir)
-            print(f"{'='*50}\n")
+            output_path = create_module(images_dir, module_filename, files_list, output_dir, rows, columns)
+            # print(f"{'='*50}\n")
         except Exception as e:
             print(f"ERROR processing module {module_name}: {str(e)}\n")
-
-if __name__ == "__main__":
-    # Absolute file path for the input directory of cells and the output directory for the final stitched module.
-    images_dir = ""
-    output_dir = ""
-    stitch_all_modules(images_dir, output_dir)
+            
+    print(f"Stitched {len(modules)} images in '{images_dir}' and saved to '{output_dir}'")

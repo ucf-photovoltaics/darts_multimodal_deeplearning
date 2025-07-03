@@ -3,6 +3,8 @@ from PIL import Image
 import os
 import numpy as np
 
+__all__ = ["remove_background", "process_folder"]
+
 # Removes the background of a given image and then crops it before saving. Takes in the input filepath (str) for the image the output filepath (str) for where to save it to and the threshold value (int: 0-255). The threshold is actually used here where it was just being passed to this function from the process_folder function.
 def remove_background(input_path, output_path, threshold=10):
     try:
@@ -39,7 +41,7 @@ def remove_background(input_path, output_path, threshold=10):
                 output_path = output_path.rsplit('.', 1)[0] + '.png'
 
             output.save(output_path)
-            print(f"Successfully removed background and saved to {output_path}")
+            print(f"Processed: {input_path} and removed the background")
 
     except Exception as e:
         print(f"Error processing image: {str(e)}")
@@ -57,14 +59,5 @@ def process_folder(input_folder, output_folder, threshold=10):
             output_filename = filename.rsplit('.', 1)[0] + '.png'
             output_path = os.path.join(output_folder, output_filename)
             remove_background(input_path, output_path, threshold)
-
-def main():
-    """Main function with example usage."""
-    input_folder = ""
-    output_folder = ""
-    # Start with a lower threshold (more sensitive)
-    threshold = 10
-    process_folder(input_folder, output_folder, threshold)
-
-if __name__ == "__main__":
-    main()
+            
+    print(f"Removed the background of {len(os.listdir(input_folder))} images in '{input_folder}' and saved to '{output_folder}'")

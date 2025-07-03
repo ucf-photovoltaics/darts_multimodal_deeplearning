@@ -1,10 +1,12 @@
 from PIL import Image
 import os
 
+__all__ = ["create_cell_filename", "get_cell_position", "divide_images"]
+
 # Creates new filename with cell number cell_## at the end where ## represents 0 through (n-1) where n = columns * rows or the total number of cells.
 def create_cell_filename(original_filename, cell_number):
     base, extension = os.path.splitext(original_filename)
-    return f"{base}_cell{str(cell_number)}{extension}"
+    return f"{base}_cell_{cell_number}{extension}"
 
 # Converts cell number to row and column coordinates.
 def get_cell_position(cell_number, columns):
@@ -45,17 +47,11 @@ def divide_images(input_folder, output_folder, rows, columns):
                     cell_img = img.crop((left, top, right, bottom))
                     new_filename = create_cell_filename(filename, cell_num)
                     cell_img.save(os.path.join(output_folder, new_filename))
-
+        
         except Exception as e:
             print(f"Error processing {filename}: {str(e)}")
+        
+        print(f"Processed: {filename} and cropped it into {rows * columns} cells")
+    
+    print(f"Cropped {len(image_files)} images in '{input_folder}' and saved to '{output_folder}'")
 
-def main():
-    INPUT_FOLDER = ""
-    OUTPUT_FOLDER = ""
-    ROWS = 3
-    COLUMNS = 12
-
-    divide_images(INPUT_FOLDER, OUTPUT_FOLDER, ROWS, COLUMNS)
-
-if __name__ == "__main__":
-    main()
