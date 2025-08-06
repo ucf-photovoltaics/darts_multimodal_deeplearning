@@ -1,0 +1,12 @@
+Build Pipeline Proposal for the System and how to run it
+    convert to COCO-> check for errors -> split -> train -> test -> train -> validate
+
+UVF_trainer
+    have it prioritize saegmentation accuracy over bbox accuracy
+    have it have the option to target better AR accuracy
+    Have it do the nice plotting of data
+    figure out how to run the current model on test data and give back accuracy results BIGGEST PRIOITY
+    clean up folder
+    Optimize training output so it more clean
+
+Build Requirements.txt
