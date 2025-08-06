@@ -1,0 +1,1 @@
+In order to use this training system, you need to have your set of annotated images,
