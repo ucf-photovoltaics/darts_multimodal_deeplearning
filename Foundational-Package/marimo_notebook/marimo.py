@@ -352,5 +352,40 @@ def _(mo):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""## Power Loss Model - Heatmap""")
+    return
+
+
+@app.cell
+def _(mo):
+    def _():
+        import sys, importlib
+        from pathlib import Path
+
+        current_file = Path(__file__).resolve()
+        project_root = current_file.parents[1]
+        power_loss_dir = project_root / "power_loss_model"
+        output_dir = project_root / "output"
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        if power_loss_dir.as_posix() not in sys.path:
+            sys.path.append(power_loss_dir.as_posix())
+
+        def run_heatmap_button(event):
+            from heatmap import run_heatmap
+            run_heatmap(
+                str(power_loss_dir / "clustered_iv_defects.csv"),
+                str(output_dir)
+            )
+
+        heatmap_button = mo.ui.button(label="Run Heatmap!", on_click=run_heatmap_button)
+        return heatmap_button
+
+    _()
+    return
+
+
 if __name__ == "__main__":
     app.run()
