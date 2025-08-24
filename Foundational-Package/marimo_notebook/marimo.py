@@ -387,5 +387,41 @@ def _(mo):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""## Power Loss Model - LSTM""")
+    return
+
+
+@app.cell
+def _(mo):
+    def _():
+        import sys, importlib
+        from pathlib import Path
+
+        current_file = Path(__file__).resolve()
+        project_root = current_file.parents[1]
+        power_loss_dir = project_root / "power_loss_model"
+        output_dir = project_root / "output"
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        if power_loss_dir.as_posix() not in sys.path:
+            sys.path.append(power_loss_dir.as_posix())
+
+        def run_lstm_button(event):
+            from lstm import run_lstm
+            run_lstm(
+                str(power_loss_dir / "clustered_iv_defects.csv"),
+                str(output_dir),
+                epochs=100
+            )
+
+        lstm_button = mo.ui.button(label="Run LSTM!", on_click=run_lstm_button)
+        return lstm_button
+
+    _()
+    return
+
+
 if __name__ == "__main__":
     app.run()
