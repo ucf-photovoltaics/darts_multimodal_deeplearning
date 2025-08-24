@@ -4,37 +4,8 @@ import torch.optim as optim
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
-import numpy
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score, mean_absolute_error
-
-# Read in data
-file_path = r"C:\Users\light\Downloads\clustered_iv_defects.csv"
-data = pd.read_csv(file_path)
-
-# Drop columns with no values
-data.dropna(inplace=True)
-
-# Define the defect and performacne metrics
-defects = ['Crack', 'Contact', 'Interconnect', 'Corrosion']
-performance_metrics = ['Voc_(V)', 'Isc_(A)', 'Pmp_(W)', 'Rs_(Ohm)']
-
-# Define x and y
-X = data[defects]
-y = data[performance_metrics]
-
-# Scale X and Y
-scaler_X = StandardScaler()
-X_scaled = scaler_X.fit_transform(X)
-scaler_y = StandardScaler()
-y_scaled = scaler_y.fit_transform(y)
-
-# Convert to PyTorch tensors
-X_tensor = torch.tensor(X_scaled, dtype=torch.float32)
-y_tensor = torch.tensor(y_scaled, dtype=torch.float32)
-
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
 
 
 # Define the MLP Neural Network
@@ -59,95 +30,128 @@ class MLPNN(nn.Module):
         return x
 
 
-# Initialize the model
-model = MLPNN()
+def run_first_mlp(file_path: str, epochs: int = 1000):
+    """
+    Runs the MLP model training and evaluation pipeline.
 
-# Set criterion as mean squared error
-criterion = nn.MSELoss()
+    Args:
+        file_path (str): Path to clustered_iv_defects.csv
+        epochs (int): Number of training epochs
 
-# Using Adam optimizer to minimize the loss function
-optimizer = optim.Adam(model.parameters(), lr=0.0001, weight_decay=0.001)
+    Returns:
+        dict: metrics including test_loss, r2, mae
+    """
 
-# Train the model
-epochs = 1000
-train_losses = []
-val_losses = []
+    # Load data
+    data = pd.read_csv(file_path)
+    data.dropna(inplace=True)
 
-# Training loop
-for epoch in range(epochs):
-    # Set the model to training mode
-    model.train()
+    # Define features and targets
+    defects = ['Crack', 'Contact', 'Interconnect', 'Corrosion']
+    performance_metrics = ['Voc_(V)', 'Isc_(A)', 'Pmp_(W)', 'Rs_(Ohm)']
 
-    # Forward pass
-    outputs = model(X_train)
-    loss = criterion(outputs, y_train)
+    X = data[defects]
+    y = data[performance_metrics]
 
-    # Backward pass and optimization
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+    # Scale
+    scaler_X = StandardScaler()
+    X_scaled = scaler_X.fit_transform(X)
+    scaler_y = StandardScaler()
+    y_scaled = scaler_y.fit_transform(y)
 
-    # Set the model to evaluation mode
+    # Convert to tensors
+    X_tensor = torch.tensor(X_scaled, dtype=torch.float32)
+    y_tensor = torch.tensor(y_scaled, dtype=torch.float32)
+
+    # Train-test split
+    X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
+
+    # Initialize model, criterion, optimizer
+    model = MLPNN()
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.0001, weight_decay=0.001)
+
+    # Training loop
+    train_losses, val_losses = [], []
+    for epoch in range(epochs):
+        model.train()
+        outputs = model(X_train)
+        loss = criterion(outputs, y_train)
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        model.eval()
+        with torch.no_grad():
+            val_outputs = model(X_test)
+            val_loss = criterion(val_outputs, y_test)
+
+        train_losses.append(loss.item())
+        val_losses.append(val_loss.item())
+
+    # Plot training/validation loss
+    plt.figure(figsize=(10, 6))
+    plt.plot(train_losses, label='Training Loss')
+    plt.plot(val_losses, label='Validation Loss')
+    plt.title('Training and Validation Loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.show()
+
+    # Evaluate the test loss
     model.eval()
     with torch.no_grad():
-        val_outputs = model(X_test)
-        val_loss = criterion(val_outputs, y_test)
+        y_pred = model(X_test)
+        test_loss = criterion(y_pred, y_test)
 
-    # Save training and validation losses for plotting
-    train_losses.append(loss.item())
-    val_losses.append(val_loss.item())
+    # Convert to numpy
+    y_pred_np = y_pred.numpy()
+    y_test_np = y_test.numpy()
 
-    # Print every 10 epochs
-    if (epoch + 1) % 10 == 0:
-        print(f"Epoch [{epoch + 1}/{epochs}], Training Loss: {loss.item():.4f}, Validation Loss: {val_loss.item():.4f}")
+    # Reverse scaling
+    y_pred_original = scaler_y.inverse_transform(y_pred_np)
+    y_test_original = scaler_y.inverse_transform(y_test_np)
 
-# Plot the training and validation loss
-plt.figure(figsize=(10, 6))
-plt.plot(train_losses, label='Training Loss')
-plt.plot(val_losses, label='Validation Loss')
-plt.title('Training and Validation Loss')
-plt.xlabel('Epochs')
-plt.ylabel('Loss')
-plt.legend()
-plt.show()
+    # Calculate metrics
+    r2 = r2_score(y_test_original, y_pred_original)
+    mae = mean_absolute_error(y_test_original, y_pred_original)
 
-# Evaluate the test loss
-model.eval()
-with torch.no_grad():
-    y_pred = model(X_test)
-    test_loss = criterion(y_pred, y_test)
-    print(f"Test Loss: {test_loss.item():.4f}")
+    print("\n========== Model Evaluation ==========")
+    print(f"Test Loss (MSE): {test_loss.item():.4f}")
+    print(f"R² Score       : {r2:.4f}")
+    print(f"MAE            : {mae:.4f}")
 
-# Compare predicted and true values
-y_pred_np = y_pred.numpy()
-y_test_np = y_test.numpy()
+    # Display first 5 rows in table format
+    results_df = pd.DataFrame(
+        {
+            f"Predicted {m}": y_pred_original[:5, i]
+            for i, m in enumerate(performance_metrics)
+        }
+    )
+    for i, m in enumerate(performance_metrics):
+        results_df[f"True {m}"] = y_test_original[:5, i]
 
-# Reverse scaling for predictions and true values
-y_pred_original = scaler_y.inverse_transform(y_pred_np)
-y_test_original = scaler_y.inverse_transform(y_test_np)
+    print("\n========== Sample Predictions (first 5) ==========")
+    print(results_df.to_string(index=False))
 
-# Display the first 5 predicted values and true values for each performance metric
-print("Predicted values (first 5 rows):")
-print(y_pred_original[:5])
-print("\nTrue values (first 5 rows):")
-print(y_test_original[:5])
+    # Plot Predicted vs True
+    plt.figure(figsize=(10, 6))
+    for i, metric in enumerate(performance_metrics):
+        plt.subplot(2, 2, i + 1)
+        plt.scatter(y_test_original[:, i], y_pred_original[:, i], label=f"{metric}")
+        plt.xlabel(f"True {metric}")
+        plt.ylabel(f"Predicted {metric}")
+        plt.title(metric)
+        plt.legend()
+    plt.tight_layout()
+    plt.show()
 
-# Calculate R² score
-r2 = r2_score(y_test_original, y_pred_original)
-print(f"R² score: {r2:.4f}")
-
-# Calculate Mean Absolute Error
-mae = mean_absolute_error(y_test_original, y_pred_original)
-print(f"Mean Absolute Error (MAE): {mae:.4f}")
-
-# Plot Predicted vs. True Values for Each Performance Metric
-plt.figure(figsize=(10, 6))
-for i, metric in enumerate(performance_metrics):
-    plt.subplot(3, 3, i + 1)
-    plt.scatter(y_test_original[:, i], y_pred_original[:, i], label=f"Predicted vs True {metric}")
-    plt.xlabel(f"True {metric}")
-    plt.ylabel(f"Predicted {metric}")
-    plt.title(f"{metric}")
-    plt.legend()
-plt.tight_layout()
-plt.show()
+    return {
+        "test_loss": test_loss,
+        "r2_score": r2,
+        "mae": mae,
+        "predicted": y_pred_original[:5],
+        "true": y_test_original[:5]
+    }

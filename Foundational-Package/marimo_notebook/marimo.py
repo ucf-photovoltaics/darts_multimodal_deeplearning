@@ -301,5 +301,56 @@ def _(mo):
     return
 
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""# Run Power Loss Model scripts individually below:""")
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""## Power Loss Model - First MLP""")
+    return
+
+
+@app.cell
+def _(mo):
+    def _():
+        import sys, importlib
+        from pathlib import Path
+
+        current_file = Path(__file__).resolve()
+        project_root = current_file.parents[1]
+        power_loss_dir = project_root / "power_loss_model"
+        output_dir = project_root / "output"
+        output_dir.mkdir(parents=True, exist_ok=True)  # ensure it exists
+
+        if power_loss_dir.as_posix() not in sys.path:
+            sys.path.append(power_loss_dir.as_posix())
+
+        def run_first_mlp_button(event):
+            from first_mlp import run_first_mlp
+
+            results = run_first_mlp(
+                str(power_loss_dir / "clustered_iv_defects.csv"),
+                epochs=500
+            )
+
+            # Write results dictionary to a text file instead of printing raw
+            results_file = output_dir / "first_mlp_results.txt"
+            with open(results_file, "w") as f:
+                f.write("========== Model Results ==========\n")
+                for key, val in results.items():
+                    f.write(f"{key}: {val}\n")
+
+            print(f"Results saved to: {results_file}")
+
+        mlp_button = mo.ui.button(label="Run First MLP!", on_click=run_first_mlp_button)
+        return mlp_button
+
+    _()
+    return
+
+
 if __name__ == "__main__":
     app.run()
