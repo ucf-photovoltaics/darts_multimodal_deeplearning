@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score, mean_absolute_error
+from pathlib import Path
 
 
 # Define the MLP Neural Network
@@ -30,17 +31,26 @@ class MLPNN(nn.Module):
         return x
 
 
-def run_first_mlp(file_path: str, epochs: int = 1000):
+def run_first_mlp(file_path: str, epochs: int = 1000, output_dir: str | None = None):
     """
     Runs the MLP model training and evaluation pipeline.
 
     Args:
         file_path (str): Path to clustered_iv_defects.csv
         epochs (int): Number of training epochs
+        output_dir (str | None): Folder to save plots; defaults to Foundational-Package/output  # CHANGED: documented
 
     Returns:
         dict: metrics including test_loss, r2, mae
     """
+
+    # Ensure output directory exists
+    if output_dir is None:
+        # power_loss_model/first_mlp.py -> parents[1] == Foundational-Package
+        output_path = Path(__file__).resolve().parents[1] / "output"
+    else:
+        output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
 
     # Load data
     data = pd.read_csv(file_path)
@@ -98,6 +108,7 @@ def run_first_mlp(file_path: str, epochs: int = 1000):
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
+    plt.savefig(output_path / "first_mlp_loss.png", bbox_inches="tight", dpi=300)
     plt.show()
 
     # Evaluate the test loss
@@ -146,6 +157,7 @@ def run_first_mlp(file_path: str, epochs: int = 1000):
         plt.title(metric)
         plt.legend()
     plt.tight_layout()
+    plt.savefig(output_path / "first_mlp_pred_vs_true.png", bbox_inches="tight", dpi=300)
     plt.show()
 
     return {

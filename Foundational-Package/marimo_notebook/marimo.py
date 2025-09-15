@@ -306,6 +306,53 @@ def _(mo):
     mo.md(r"""# Run Power Loss Model scripts individually below:""")
     return
 
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""## Power Loss Model - KMeans (IV summary)""")
+    return
+
+@app.cell
+def _(mo):
+    def _():
+        import sys, importlib
+        from pathlib import Path
+
+        current_file = Path(__file__).resolve()
+        project_root = current_file.parents[1]
+        power_loss_dir = project_root / "power_loss_model"
+        output_dir = project_root / "output"
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        if power_loss_dir.as_posix() not in sys.path:
+            sys.path.append(power_loss_dir.as_posix())
+
+        def run_kmeans_button(event):
+            from kmeans_iv_summary import run_kmeans_iv_summary
+
+            iv_summary = power_loss_dir / "iv_summary.txt"
+            defects_csv = power_loss_dir / "M55Dataframe.csv"
+            metadata_txt = power_loss_dir / "m55_module_metadata.txt"
+
+            results = run_kmeans_iv_summary(
+                str(iv_summary),
+                str(defects_csv),
+                str(metadata_txt),
+                str(output_dir),
+            )
+
+            summary_path = output_dir / "kmeans_summary.txt"
+            with open(summary_path, "w") as f:
+                f.write("KMeans (IV summary) outputs\n")
+                for k, v in (results or {}).items():
+                    f.write(f"{k}: {v}\n")
+            print(f"Summary saved to: {summary_path}")
+
+        btn = mo.ui.button(label="Run KMeans (IV summary)!", on_click=run_kmeans_button)
+        return btn
+
+    _()
+    return
+
 
 @app.cell(hide_code=True)
 def _(mo):
